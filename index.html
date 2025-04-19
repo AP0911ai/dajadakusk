@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daja Daku SK</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header { background-color: #004d99; color: white; padding: 10px 20px; text-align: center; }
+    section { padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 8px; border: 1px solid #ddd; text-align: center; }
+    .form-container { width: 100%; max-width: 400px; margin: auto; }
+    .form-container input { width: 100%; padding: 10px; margin-bottom: 10px; }
+    footer { background-color: #f1f1f1; text-align: center; padding: 10px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Daja Daku SK</h1>
+  <p>Empowering the Youth for a Brighter Future</p>
+</header>
+
+<section id="about">
+  <h2>About Sangguniang Kabataan</h2>
+  <p>The Sangguniang Kabataan (SK) is a local government council that represents the youth of Barangay Daja Daku. Our mission is to provide a platform for youth development through various programs, events, and initiatives.</p>
+  <p>Current Chairperson: Hon. Reynaldo Chin Jr.</p>
+</section>
+
+<section id="programs">
+  <h2>Programs & Events</h2>
+  <ul>
+    <li>Youth Development Programs</li>
+    <li>Sports Events</li>
+    <li>FLAP (Youth Learning Assistance Program)</li>
+    <li>DAKU (Dungog Alang sa Kabatan-unang Ugmadon)</li>
+    <li>Esports League</li>
+  </ul>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <p>If you have any inquiries, feel free to reach out via email:</p>
+  <p><a href="mailto:dajadakusk@gmail.com">dajadakusk@gmail.com</a></p>
+</section>
+
+<section id="kk-members">
+  <h2>Katipunan ng Kabataan Members</h2>
+  <table id="membersTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Address</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Data will be dynamically inserted here -->
+    </tbody>
+  </table>
+
+  <h3>Join the Katipunan ng Kabataan</h3>
+  <div class="form-container">
+    <form id="kkForm">
+      <input type="text" id="name" placeholder="Full Name" required>
+      <input type="number" id="age" placeholder="Age" required>
+      <input type="text" id="sitio" placeholder="Sitio" required>
+      <input type="email" id="email" placeholder="Email (optional)">
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2025 Daja Daku SK. All Rights Reserved.</p>
+</footer>
+
+<script>
+  const sheetID = "YOUR_SHEET_ID"; // Replace with your Google Sheets ID
+  const apiKey = "YOUR_API_KEY";   // Replace with your API key
+  const range = "Sheet1!A2:E";    // Modify this based on your sheet structure
+
+  function getSheetData() {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${range}?key=${apiKey}`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const rows = data.values;
+        displayData(rows);
+      })
+      .catch(error => console.error('Error fetching data: ', error));
+  }
+
+  function displayData(rows) {
+    const table = document.getElementById('membersTable').getElementsByTagName('tbody')[0];
+    rows.forEach((row, index) => {
+      const tr = document.createElement('tr');
+      const uniqueID = `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}-${index + 1}`;
+      const tdID = document.createElement('td');
+      tdID.textContent = uniqueID;
+      tr.appendChild(tdID);
+      row.forEach(cell => {
+        const td = document.createElement('td');
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+      table.appendChild(tr);
+    });
+  }
+
+  function submitForm(event) {
+    event.preventDefault();
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+    const sitio = document.getElementById('sitio').value;
+    const email = document.getElementById('email').value;
+    
+    const formData = {
+      name,
+      age,
+      sitio,
+      email
+    };
+    
+    // Add form data to Google Sheet
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/Sheet1!A2:D2:append?valueInputOption=RAW&key=${apiKey}`;
+    
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ values: [[name, age, sitio, email]] }),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(() => {
+      alert('Thank you for submitting your details!');
+      getSheetData();  // Refresh the member list
+    })
+    .catch(error => console.error('Error submitting form: ', error));
+  }
+
+  // Load data and add event listener to form
+  window.onload = function() {
+    getSheetData();
+    document.getElementById('kkForm').addEventListener('submit', submitForm);
+  };
+</script>
+
+</body>
+</html>
